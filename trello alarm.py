@@ -1,19 +1,19 @@
 
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 import trello
 import pync
 import time
 import subprocess
-import sys
+import os
 
 
 # In[2]:
 
-api_key = sys.environ['TRELLO_APIKEY']
-token = sys.environ['TRELLO_TOKEN']
+api_key = os.environ['TRELLO_APIKEY']
+token = os.environ['TRELLO_TOKEN']
 
 
 # In[3]:
@@ -102,7 +102,7 @@ def parseTime(tstr):
 
 # In[13]:
 
-def run_serial_timer(trello, cards):
+def run_serial_timer(trello, cards, loud=True):
     l = len(cards)
     future, t, tstr, _t = parseCard(cards[0])
     subprocess.call(['say', 'Do {} for {}'.format(future, tstr)])
@@ -123,10 +123,11 @@ def run_serial_timer(trello, cards):
             trello.cards.update_name(card['id'], '{} ends in {}'.format(name, str(sec) + ' seconds'))
             time.sleep(sec)
         pync.Notifier.notify(name, title='Timer Up!')
-        subprocess.call(['afplay', 'gong trim.m4a', '-t', '1'])
-        if future:
+        if loud:
+            subprocess.call(['afplay', 'gong trim.m4a', '-t', '1'])
+        if future and loud:
             subprocess.call(['say', '{} is over. Now do {} for {}'.format(name, future, tstr)])
-        else:
+        elif loud:
             subprocess.call(['say', '{} is over'.format(name)])
         trello.cards.delete_label_color('green', card['id'])
         trello.cards.update_name(card['id'], title)
@@ -142,13 +143,17 @@ run_serial_timer(t, ser_cards)
 def repeat():
     ser_cards = get_cards(t, serial['id'])
     run_serial_timer(t, ser_cards)
+    
+def repeat_quiet():
+    ser_cards = get_cards(t, serial['id'])
+    run_serial_timer(t, ser_cards, False)
 
 
-# In[ ]:
+# In[16]:
 
 # TODO
 # Add label to current timer and add to title how long it has left
-repeat()
+repeat_quiet()
 
 
 # In[ ]:
