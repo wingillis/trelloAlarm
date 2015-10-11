@@ -1,4 +1,5 @@
 .ipynb_checkpoints/
 task_history.csv
+task_history.csv.old
 .DS_Store
 __pycache__/
