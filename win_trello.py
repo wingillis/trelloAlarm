@@ -1,3 +1,4 @@
+import re
 
 def login_and_get_boards(trello):
     wg = trello.members.get('winthropgillis')
@@ -26,35 +27,38 @@ def parseCard(card):
         name, time = title.split('-')
         name = name.strip()
         time = time.strip()
-        time, tstr = parseTime(time)
+        time, tstr = parseTime(time, True)
         return (name, time, tstr, title)
     except:
         return tuple([None]*4)
 
 def parseProcessedCard(card):
     title = card['name']
+    pattern = '[0-9]{1,4}m [0-9]{1,2}s'
     output = {
         '1.name': '',
         '2.date': '',
         '3.original time': '',
-        '4.actual time', ''
+        '4.actual time': ''
     }
     try:
-        name, rest = title.split('-')
-        if '|||' in rest:
-            ot, at = rest.split('|||')
-            at = at.replace(' actual time ', '')
+        matches = list(re.finditer(pattern, title))
+        if len(matches) == 0 or len(matches) > 2:
+            raise Exception('Error in matches found - timing information not available')
 
+        s,e = matches[0].span()
+        name = title[:s-3]
+        ot = title[s:e]
+        if len(matches) > 1:
+            s,e = matches[1].span()
+            at = title[s:e]
         else:
-            ot = rest
-            at = rest
+            at = title[s:e]
         name = name.strip()
         # original timing
-        ot = ot.strip()
-        ott, _ = parseTime(ot)
+        ott = parseTime(ot)
         # actual timing
-        at = at.strip()
-        att, _ = parseTime(at)
+        att = parseTime(at)
 
         output['1.name'] = name
         output['2.date'] = card['dateLastActivity']
@@ -65,18 +69,18 @@ def parseProcessedCard(card):
         return {'error': str(e)}
 
 
-
-
-
-def parseTime(tstr):
+def parseTime(tstr, human_readable=False):
     sminute, ssec = tstr.split(' ')
     minute = int(sminute[:-1])
     sec = int(ssec[:-1])
-    time_str = ''
-    if minute:
-        time_str += '{} minutes '.format(minute)
-    if sec:
-        if time_str:
-            time_str += 'and '
-        time_str += '{} seconds'.format(sec)
-    return (sec+ minute*60, time_str)
+    if human_readable:
+        time_str = ''
+        if minute:
+            time_str += '{} minutes '.format(minute)
+        if sec:
+            if time_str:
+                time_str += 'and '
+            time_str += '{} seconds'.format(sec)
+        return (sec+ minute*60, time_str)
+    else:
+        return sec + minute * 60

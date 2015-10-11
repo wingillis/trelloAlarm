@@ -5,6 +5,7 @@ import subprocess
 import os
 import datetime
 import sys
+import select
 from win_trello import *
 
 
@@ -73,14 +74,16 @@ def main_timer(trello, cards, index, serial_id, loud=True):
         if minutes:
             timer_name(card, name, minutes)
 
-        for i in range(t, 0, -10):
+        for j in range(t, 0, -10):
             # get labels for current card
-            if sys.stdin.readline().strip() == 'end':
-                end = True
-                break
+            ready = select.select([sys.stdin], [], [], 0)[0]
+            if ready:
+                if sys.stdin.readline().strip() == 'end':
+                    end = True
+                    break
             card = trello.cards.update(card['id'])
             if is_done(card):
-                delta = t-(i+remainder)
+                delta = t-(j+remainder)
                 # record delta in card's title - override title because of bottom
                 title += ' ||| actual time {}m {}s'.format(delta//60, delta%60)
                 remainder = 0
@@ -93,11 +96,11 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                     if is_done(card):
                         break
                     if plus_time%60 == 0:
-                        val, sec = i + remainder if not minutes else i//60, (not minutes)
+                        val, sec = j + remainder if not minutes else j//60, (not minutes)
                         timer_name(card, name, val, sec,
                                 added=' running for an additional {}m {}s'
                                     .format(plus_time//60, plus_time%60))
-                delta = i + plus_time
+                delta = t - (j + remainder) + plus_time
                 title += ' ||| actual time {}m {}s'.format(delta//60, delta%60)
                 break
 
