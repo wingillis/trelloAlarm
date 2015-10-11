@@ -62,8 +62,8 @@ def parseProcessedCard(card):
 
         output['1.name'] = name
         output['2.date'] = card['dateLastActivity']
-        output['3.original time'] = ott
-        output['4.actual time'] = att
+        output['3.original time'] = str(ott)
+        output['4.actual time'] = str(att)
         return output
     except Exception as e:
         return {'error': str(e)}

@@ -9,9 +9,9 @@ def process_tasks(trello, plist):
             data = parseProcessedCard(card)
             if data.get('1.name', None):
                 keys = sorted(list(data.keys()))
-                line = ','.join([data[k] for k in keys])
+                line = '\t'.join([data[k] for k in keys])
                 f.write(line + '\n')
-                trello.cards.update_closed(card['id'], True)
+                trello.cards.update_closed(card['id'], 'true')
             else:
                 print(data.get('error', None))
                 print('Card could not be parsed, keeping it')
