@@ -116,7 +116,8 @@ def main(stats_card, q):
     lists = get_lists(trello, timer_id)
     stats_id = filter_lists(lists, 'Stats')
     piechart_card = trello.cards.new('Task time overview for {}'.format(today), stats_id)
-    trello.cards.update(piechart_card['id'], pos=stats_card['pos']+0.1)
+    cards = get_cards(trello, stats_id)
+    trello.cards.update(piechart_card['id'], pos=(cards[0]['pos']+cards[1]['pos'])/2)
     serial_cards = []
     begin_time = datetime.datetime.now()
 
