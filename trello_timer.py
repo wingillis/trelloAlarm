@@ -33,6 +33,14 @@ def not_done(card):
             return True
     return False
 
+def is_ending():
+    ready = select.select([sys.stdin], [], [], 0)[0]
+    if ready and sys.stdin.readline().strip() == 'end':
+        return True
+    else:
+        return False
+
+
 def main_timer(trello, cards, index, serial_id, loud=True):
     def new_name(card, s):
         trello.cards.update_name(card['id'], s)
@@ -75,21 +83,22 @@ def main_timer(trello, cards, index, serial_id, loud=True):
             timer_name(card, name, minutes)
 
         for j in range(t, 0, -10):
-            # get labels for current card
-            ready = select.select([sys.stdin], [], [], 0)[0]
-            if ready:
-                if sys.stdin.readline().strip() == 'end':
-                    end = True
-                    break
+            # check for ending
+            if is_ending():
+                end = True
+                break
             card = trello.cards.update(card['id'])
             if is_done(card):
                 delta = t-(j+remainder)
                 # record delta in card's title - override title because of bottom
-                title += ' ||| actual time {}m {}s'.format(delta//60, delta%60)
+                title += ' actual time {}m {}s'.format(delta//60, delta%60)
                 remainder = 0
                 break
             if not_done(card):
                 while not_done(card):
+                    if is_ending():
+                        end = True
+                        break
                     time.sleep(10)
                     plus_time += 10
                     card = trello.cards.update(card['id'])
@@ -100,9 +109,10 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                         timer_name(card, name, val, sec,
                                 added=' running for an additional {}m {}s'
                                     .format(plus_time//60, plus_time%60))
-                delta = t - (j + remainder) + plus_time
-                title += ' ||| actual time {}m {}s'.format(delta//60, delta%60)
-                break
+                if not end:
+                    delta = t - (j + remainder) + plus_time
+                    title += ' actual time {}m {}s'.format(delta//60, delta%60)
+                    break
 
             if not minutes:
                 timer_name(card, name, j + remainder, True)
