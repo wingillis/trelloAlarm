@@ -89,20 +89,25 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                 break
             card = trello.cards.update(card['id'])
             if is_done(card):
+                print('Card finished early')
                 delta = t-(j+remainder)
                 # record delta in card's title - override title because of bottom
                 title += ' actual time {}m {}s'.format(delta//60, delta%60)
                 remainder = 0
                 break
             if not_done(card):
+                print('Card detected to be not done')
                 while not_done(card):
                     if is_ending():
+                        print('Ending detected! Shutting down...')
+                        trello.cards.delete_label_color('orange', card['id'])
                         end = True
                         break
                     time.sleep(10)
                     plus_time += 10
                     card = trello.cards.update(card['id'])
                     if is_done(card):
+                        print('Delayed card now finished')
                         break
                     if plus_time%60 == 0:
                         val, sec = j + remainder if (not minutes and j<60) else j//60, (not minutes and j<60)
@@ -113,6 +118,10 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                     delta = t - (j + remainder) + plus_time
                     title += ' actual time {}m {}s'.format(delta//60, delta%60)
                     break
+
+            if end:
+                print('End detected! Breaking out of timer loop')
+                break
 
             if not minutes:
                 timer_name(card, name, j + remainder, True)
