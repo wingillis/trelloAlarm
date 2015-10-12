@@ -96,7 +96,7 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                     if is_done(card):
                         break
                     if plus_time%60 == 0:
-                        val, sec = j + remainder if not minutes else j//60, (not minutes)
+                        val, sec = j + remainder if (not minutes and j<60) else j//60, (not minutes and j<60)
                         timer_name(card, name, val, sec,
                                 added=' running for an additional {}m {}s'
                                     .format(plus_time//60, plus_time%60))
@@ -105,10 +105,10 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                 break
 
             if not minutes:
-                timer_name(card, name, i + remainder, True)
+                timer_name(card, name, j + remainder, True)
 
-            elif minutes != i//60:
-                minutes = i//60
+            elif minutes != j//60:
+                minutes = j//60
                 timer_name(card, name, minutes)
 
             time.sleep(10)
