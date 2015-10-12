@@ -28,7 +28,7 @@ def main():
 
     lists = get_lists(trello, timer_id)
 
-    process_list = list(filter(lambda d: d['name'] == 'For processing', lists))[0]
+    process_list = filter_lists(lists, 'For processing')
     process_tasks(trello, process_list)
 
 if __name__=='__main__':

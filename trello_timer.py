@@ -6,6 +6,9 @@ import os
 import datetime
 import sys
 import select
+import threading
+import trello_stats
+import queue
 from win_trello import *
 
 
@@ -111,9 +114,10 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                         break
                     if plus_time%60 == 0:
                         val, sec = j + remainder if (not minutes and j<60) else j//60, (not minutes and j<60)
+                        delta = t - (j + remainder) + plus_time
                         timer_name(card, name, val, sec,
-                                added=' running for an additional {}m {}s'
-                                    .format(plus_time//60, plus_time%60))
+                                added=' delayed - running total {}m {}s'
+                                    .format(delta//60, delta%60))
                 if not end:
                     delta = t - (j + remainder) + plus_time
                     title += ' actual time {}m {}s'.format(delta//60, delta%60)
@@ -169,6 +173,7 @@ def main_timer(trello, cards, index, serial_id, loud=True):
 # every 10 seconds, detect label on card
 
 def main():
+    q = queue.Queue()
     api_key = os.environ['TRELLO_APIKEY']
     token = os.environ['TRELLO_TOKEN']
 
@@ -180,7 +185,11 @@ def main():
 
     # if the ids do change, use this
     # timer_id = get_board(trello, boards, 'Timers')
-    # lists = get_lists(trello, timer_id)
+    lists = get_lists(trello, timer_id)
+    stats_id = filter_lists(lists, 'Stats')
+    stats_card = generate_card(trello, stats_id, 'Stats for {}'.format(datetime.date.today()))
+    thread = threading.Thread(target=trello_stats.main, args=(stats_card, q))
+    thread.start()
     # serial_list = list(filter(lambda d: d['name'] == 'Serial', lists))[0]
     # serial_list_id = serial_list['id']
 
@@ -193,7 +202,10 @@ def main():
         if run:
             print('New card added, restarting timer')
 
+    trello.cards.update_closed(stats_card['id'], 'true')
     print('Nice!')
+    q.put(True)
+    q.join()
 
 if __name__=='__main__':
     main()

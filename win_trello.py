@@ -13,6 +13,8 @@ def get_lists(trello, b_id):
     lists = trello.boards.get_list(b_id)
     return lists
 
+def filter_lists(lists, l_name):
+    return [x['id'] for x in lists if x['name'] == l_name][0]
 
 def filter_board(trello, b, name):
     board = trello.boards.get(b)
@@ -68,7 +70,6 @@ def parseProcessedCard(card):
     except Exception as e:
         return {'error': str(e)}
 
-
 def parseTime(tstr, human_readable=False):
     sminute, ssec = tstr.split(' ')
     minute = int(sminute[:-1])
@@ -84,3 +85,7 @@ def parseTime(tstr, human_readable=False):
         return (sec+ minute*60, time_str)
     else:
         return sec + minute * 60
+
+def generate_card(trello, l_id, title):
+    card = trello.cards.new(title, l_id)
+    return card
