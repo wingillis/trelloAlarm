@@ -80,7 +80,7 @@ def main_timer(trello, cards, index, serial_id, loud=True):
         t, remainder = t//10 * 10 , t%10
         minutes = t//60
         plus_time = 0
-
+        trello.cards.update_desc(card['id'], title)
         # one-time update
         if minutes:
             timer_name(card, name, minutes)
@@ -146,6 +146,7 @@ def main_timer(trello, cards, index, serial_id, loud=True):
         #     subprocess.call(['afplay', 'gong trim.m4a', '-t', '1'])
 
         trello.cards.delete_label_color('green', card['id'])
+        trello.cards.update_desc(card['id'], '')
         new_name(card, title)
 
         if end:
@@ -188,6 +189,7 @@ def main():
     lists = get_lists(trello, timer_id)
     stats_id = filter_lists(lists, 'Stats')
     stats_card = generate_card(trello, stats_id, 'Stats for {}'.format(datetime.date.today()))
+    trello.cards.update(stats_card['id'], pos=0)
     thread = threading.Thread(target=trello_stats.main, args=(stats_card, q))
     thread.start()
     # serial_list = list(filter(lambda d: d['name'] == 'Serial', lists))[0]
@@ -198,7 +200,7 @@ def main():
     index = 0
 
     while run:
-        run, cards, index = main_timer(trello, cards, index, serial_list_id)
+        run, cards, index = main_timer(trello, cards, index, serial_list_id, loud=False)
         if run:
             print('New card added, restarting timer')
 
