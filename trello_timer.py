@@ -13,7 +13,9 @@ from win_trello import *
 
 
 def say(text):
-    subprocess.call(['say', text])
+    # temporarily turning this off for quietness
+    # subprocess.call(['say', text])
+    pass
 
 def find_card_in_list(lis, card):
     pos = [i for i,x in enumerate(lis) if x['id']==card['id']][0]
@@ -200,7 +202,7 @@ def main():
     index = 0
 
     while run:
-        run, cards, index = main_timer(trello, cards, index, serial_list_id, loud=False)
+        run, cards, index = main_timer(trello, cards, index, serial_list_id, loud=True)
         if run:
             print('New card added, restarting timer')
 
