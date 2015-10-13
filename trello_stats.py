@@ -128,25 +128,30 @@ def main(stats_card, q):
                 print('Quitting')
                 trello.cards.update(piechart_card['id'], pos=piechart_card['pos']+1)
                 break
-        new_cards = get_cards(trello, serial_list_id)
-        if order_changed(serial_cards, new_cards) or something_changed(serial_cards, new_cards):
-            serial_cards = new_cards
-            # update_card_data(serial_cards)
-            title = generate_title_summary(serial_cards, begin_time)
-            trello.cards.update_name(stats_card['id'], title)
+	try:
+            new_cards = get_cards(trello, serial_list_id)
+       	    if order_changed(serial_cards, new_cards) or something_changed(serial_cards, new_cards):
+                serial_cards = new_cards
+                # update_card_data(serial_cards)
+                title = generate_title_summary(serial_cards, begin_time)
+                trello.cards.update_name(stats_card['id'], title)
 
-            data = get_times_and_labels(serial_cards)
-            labels = list(map(lambda a: a[0], data))
-            times = list(map(lambda a: a[1], data))
-            img_link, plotly_link = plt_data.draw_piechart(labels, times)
-            if piechart_card['badges']['attachments'] >= 2:
-                for a in trello.cards.get_attachment(piechart_card['id']):
-                    trello.cards.delete_attachment(piechart_card['id'], a['id'])
-            trello.cards.new_attachment(piechart_card['id'], img_link, 'Chart')
-            # f = StringIO(plotly_link)
-            trello.cards.new_attachment(piechart_card['id'], plotly_link, 'Chart - Interactive')
+                data = get_times_and_labels(serial_cards)
+                labels = list(map(lambda a: a[0], data))
+                times = list(map(lambda a: a[1], data))
+                img_link, plotly_link = plt_data.draw_piechart(labels, times)
+                if piechart_card['badges']['attachments'] >= 2:
+                    for a in trello.cards.get_attachment(piechart_card['id']):
+                        trello.cards.delete_attachment(piechart_card['id'], a['id'])
+                trello.cards.new_attachment(piechart_card['id'], img_link, 'Chart')
+                # f = StringIO(plotly_link)
+                trello.cards.new_attachment(piechart_card['id'], plotly_link, 'Chart - Interactive')
 
-            piechart_card = trello.cards.update(piechart_card['id'])
+                piechart_card = trello.cards.update(piechart_card['id'])
+	except Exception as e:
+	    print('Catching exception that was thrown... {}'.format(e))
+	    print('Don\'t worry, not stopping the program')
+
 
 
         time.sleep(5)
