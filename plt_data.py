@@ -25,7 +25,7 @@ def draw_piechart(labels, times):
         }],
         'layout': {
             'title': 'Proportion of time for each task',
-            'legend': gph.Legend(font=gph.Font(size=25))
+            # 'legend': gph.Legend(font=gph.Font(size=25))
         }
     }
 
