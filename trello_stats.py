@@ -128,7 +128,7 @@ def main(stats_card, q):
                 print('Quitting')
                 trello.cards.update(piechart_card['id'], pos=piechart_card['pos']+1)
                 break
-	try:
+        try:
             new_cards = get_cards(trello, serial_list_id)
        	    if order_changed(serial_cards, new_cards) or something_changed(serial_cards, new_cards):
                 serial_cards = new_cards
@@ -148,10 +148,10 @@ def main(stats_card, q):
                 trello.cards.new_attachment(piechart_card['id'], plotly_link, 'Chart - Interactive')
 
                 piechart_card = trello.cards.update(piechart_card['id'])
-	except Exception as e:
-	    print('Catching exception that was thrown... {}'.format(e))
-	    print('Don\'t worry, not stopping the program')
+        except Exception as e:
+            print('Catching exception that was thrown... {}'.format(e))
+            print('Don\'t worry, not stopping the program')
 
 
 
-        time.sleep(5)
+        time.sleep(10)

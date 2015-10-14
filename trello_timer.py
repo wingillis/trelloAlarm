@@ -65,109 +65,114 @@ def main_timer(trello, cards, index, serial_id, loud=True):
     end = False
 
     for i, card in enumerate(enumerate_cards):
-        # get information for the next task, if there is one
-        if i<l-1:
-            future, t, tstr, _t = parseCard(enumerate_cards[i+1])
-        else:
-            future = None
-        name, t, ttemp, title = parseCard(card)
+        try:
+            # get information for the next task, if there is one
+            if i<l-1:
+                future, t, tstr, _t = parseCard(enumerate_cards[i+1])
+            else:
+                future = None
+            name, t, ttemp, title = parseCard(card)
 
-        # say the first task
-        if i==0 and l!=1:
-            say(do.format(name, ttemp))
+            # say the first task
+            if i==0 and l!=1:
+                say(do.format(name, ttemp))
 
-        # add 'current' label
-        trello.cards.new_label(card['id'], 'green')
+            # add 'current' label
+            trello.cards.new_label(card['id'], 'green')
 
-        t, remainder = t//10 * 10 , t%10
-        minutes = t//60
-        plus_time = 0
-        trello.cards.update_desc(card['id'], title)
-        # one-time update
-        if minutes:
-            timer_name(card, name, minutes)
-
-        for j in range(t, 0, -10):
-            # check for ending
-            if is_ending():
-                end = True
-                break
-            card = trello.cards.update(card['id'])
-            if is_done(card):
-                print('Card finished early')
-                delta = t-(j+remainder)
-                # record delta in card's title - override title because of bottom
-                title += ' actual time {}m {}s'.format(delta//60, delta%60)
-                remainder = 0
-                break
-            if not_done(card):
-                print('Card detected to be not done')
-                while not_done(card):
-                    if is_ending():
-                        print('Ending detected! Shutting down...')
-                        trello.cards.delete_label_color('orange', card['id'])
-                        end = True
-                        break
-                    time.sleep(10)
-                    plus_time += 10
-                    card = trello.cards.update(card['id'])
-                    if is_done(card):
-                        print('Delayed card now finished')
-                        break
-                    if plus_time%60 == 0:
-                        val, sec = j + remainder if (not minutes and j<60) else j//60, (not minutes and j<60)
-                        delta = t - (j + remainder) + plus_time
-                        timer_name(card, name, val, sec,
-                                added=' delayed - running total {}m {}s'
-                                    .format(delta//60, delta%60))
-                if not end:
-                    delta = t - (j + remainder) + plus_time
-                    title += ' actual time {}m {}s'.format(delta//60, delta%60)
-                    break
-
-            if end:
-                print('End detected! Breaking out of timer loop')
-                break
-
-            if not minutes:
-                timer_name(card, name, j + remainder, True)
-
-            elif minutes != j//60:
-                minutes = j//60
+            t, remainder = t//10 * 10 , t%10
+            minutes = t//60
+            plus_time = 0
+            trello.cards.update_desc(card['id'], title)
+            # one-time update
+            if minutes:
                 timer_name(card, name, minutes)
 
-            time.sleep(10)
+            for j in range(t, 0, -10):
+                # check for ending
+                if is_ending():
+                    end = True
+                    break
+                card = trello.cards.update(card['id'])
+                if is_done(card):
+                    print('Card finished early')
+                    delta = t-(j+remainder)
+                    # record delta in card's title - override title because of bottom
+                    title += ' actual time {}m {}s'.format(delta//60, delta%60)
+                    remainder = 0
+                    break
+                if not_done(card):
+                    print('Card detected to be not done')
+                    while not_done(card):
+                        if is_ending():
+                            print('Ending detected! Shutting down...')
+                            trello.cards.delete_label_color('orange', card['id'])
+                            end = True
+                            break
+                        time.sleep(10)
+                        plus_time += 10
+                        card = trello.cards.update(card['id'])
+                        if is_done(card):
+                            print('Delayed card now finished')
+                            break
+                        if plus_time%60 == 0:
+                            val, sec = j + remainder if (not minutes and j<60) else j//60, (not minutes and j<60)
+                            delta = t - (j + remainder) + plus_time
+                            timer_name(card, name, val, sec,
+                                    added=' delayed - running total {}m {}s'
+                                        .format(delta//60, delta%60))
+                    if not end:
+                        delta = t - (j + remainder) + plus_time
+                        title += ' actual time {}m {}s'.format(delta//60, delta%60)
+                        break
+
+                if end:
+                    print('End detected! Breaking out of timer loop')
+                    break
+
+                if not minutes:
+                    timer_name(card, name, j + remainder, True)
+
+                elif minutes != j//60:
+                    minutes = j//60
+                    timer_name(card, name, minutes)
+
+                time.sleep(10)
 
 
-        # finish the rest of the seconds on the timer
-        if remainder and not end:
-            time.sleep(remainder)
+            # finish the rest of the seconds on the timer
+            if remainder and not end:
+                time.sleep(remainder)
 
-        # if loud:
-        #     # plays the desired sound on a mac for 1s
-        #     subprocess.call(['afplay', 'gong trim.m4a', '-t', '1'])
+            # if loud:
+            #     # plays the desired sound on a mac for 1s
+            #     subprocess.call(['afplay', 'gong trim.m4a', '-t', '1'])
 
-        trello.cards.delete_label_color('green', card['id'])
-        trello.cards.update_desc(card['id'], '')
-        new_name(card, title)
+            trello.cards.delete_label_color('green', card['id'])
+            trello.cards.update_desc(card['id'], '')
+            new_name(card, title)
 
-        if end:
-            trello.cards.new_label(card['id'], 'yellow')
-            return (False, None, None)
+            if end:
+                trello.cards.new_label(card['id'], 'yellow')
+                return (False, None, None)
 
-        # detect new cards, then compare them to see if they are different
-        # if so, then look for the specific card in the new list, and return
-        # that index plus 1
-        compare_cards = get_cards(trello, serial_id)
+            # detect new cards, then compare them to see if they are different
+            # if so, then look for the specific card in the new list, and return
+            # that index plus 1
+            compare_cards = get_cards(trello, serial_id)
 
-        if not compare(compare_cards, cards):
-            point = find_card_in_list(compare_cards, card)
-            return (True, compare_cards, point+1)
+            if not compare(compare_cards, cards):
+                point = find_card_in_list(compare_cards, card)
+                return (True, compare_cards, point+1)
 
-        if future and loud:
-            say(over.format(name, future, tstr))
-        elif loud:
-            say('{} is over'.format(name))
+            if future and loud:
+                say(over.format(name, future, tstr))
+            elif loud:
+                say('{} is over'.format(name))
+        except Exception as e:
+            print('Error in main loop... {}'.format(e))
+            new_name(card, title)
+            return (True, cards, i)
 
 
     return (False, None, None)
