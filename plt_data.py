@@ -25,11 +25,11 @@ def draw_piechart(labels, times):
         }],
         'layout': {
             'title': 'Proportion of time for each task',
-            # 'legend': gph.Legend(font=gph.Font(size=25))
+            # 'legend': gph.Legend(font=gph.Font(size=20))
         }
     }
 
-    plt.image.save_as(data, name, width=1440, height=810)
+    plt.image.save_as(data, name, width=1280, height=760)
     url = plt.plot(data, validate=False, filename=datetime.date.today().isoformat() + ' Trello task history', auto_open=False)
     # embed = tls.get_embed(url)
 

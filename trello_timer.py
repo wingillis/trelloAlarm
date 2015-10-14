@@ -14,8 +14,8 @@ from win_trello import *
 
 def say(text):
     # temporarily turning this off for quietness
-    # subprocess.call(['say', text])
-    pass
+    subprocess.call(['say', text])
+
 
 def find_card_in_list(lis, card):
     pos = [i for i,x in enumerate(lis) if x['id']==card['id']][0]
@@ -204,7 +204,14 @@ def main():
 
     cards = get_cards(trello, serial_list_id)
     run = True
-    index = 0
+    index = find_yellow(cards)
+
+
+    if index:
+        # I want to return a 'yes' even at the first element
+        index -= 1
+        trello.cards.delete_label_color('yellow', cards[index]['id'])
+
 
     while run:
         run, cards, index = main_timer(trello, cards, index, serial_list_id, loud=True)

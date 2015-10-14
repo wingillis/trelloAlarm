@@ -86,6 +86,13 @@ def parseTime(tstr, human_readable=False):
     else:
         return sec + minute * 60
 
+def find_yellow(cards):
+    yellow_cards = [i for i, x in enumerate(cards) for y in x['labels'] if 'yellow' in y['color']]
+    if yellow_cards:
+        return yellow_cards[0] + 1
+    else:
+        return 0
+
 def generate_card(trello, l_id, title):
     card = trello.cards.new(title, l_id)
     return card
