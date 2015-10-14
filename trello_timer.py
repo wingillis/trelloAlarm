@@ -133,8 +133,8 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                 if not minutes:
                     timer_name(card, name, j + remainder, True)
 
-                elif minutes != j//60:
-                    minutes = j//60
+                elif minutes != round(j/60):
+                    minutes = round(j/60)
                     timer_name(card, name, minutes)
 
                 time.sleep(10)

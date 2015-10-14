@@ -152,6 +152,7 @@ def main(stats_card, q):
                 title = generate_title_summary(serial_cards, begin_time)
                 desc = '\n'.join(accumulate_card_time_description(serial_cards, begin_time))
                 trello.cards.update_name(stats_card['id'], title)
+                trello.cards.update_desc(stats_card['id'], desc)
 
                 data = get_times_and_labels(serial_cards)
                 labels = list(map(lambda a: a[0], data))
