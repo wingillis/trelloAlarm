@@ -3,11 +3,13 @@ from os import remove
 import datetime
 import hashlib
 from imgurpython import ImgurClient
+import boto3
 import plotly.plotly as plt
 import plotly.graph_objs as gph
 import plotly.tools as tls
 
 client = ImgurClient(env['IMGUR_ID'], env['IMGUR_SECRET'], env['imgur_access'], env['imgur_refresh'])
+s3 = boto3.resource('s3')
 
 def upload_image(title):
     res = client.upload_from_path(title, {'title':title})
@@ -31,8 +33,9 @@ def draw_piechart(labels, times):
 
     plt.image.save_as(data, name, width=1280, height=760)
     url = plt.plot(data, validate=False, filename=datetime.date.today().isoformat() + ' Trello task history', auto_open=False)
-    # embed = tls.get_embed(url)
-
+    embed = tls.get_embed(url)
+    s3.Bucket('wg-plots').put_object(Key=datetime.date.today().isoformat(), Body=embed, ContentType='text/html')
+    url = 'https://s3.amazonaws.com/wg-plots/{}.html'.format(datetime.date.today.isoformat())
     link = upload_image(name)
 
     remove(name)

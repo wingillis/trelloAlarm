@@ -44,8 +44,24 @@ def accumulate_card_time(cards):
             title = card['desc']
         matches = list(re.finditer(pattern, title))
         times += smart_time(matches)
-
     return times
+
+def accumulate_card_time_description(cards, start_time):
+    pattern = '[0-9]{1,4}m [0-9]{1,2}s'
+    desc = []
+    acc_time = 0
+    for card in cards:
+        title = card['name']
+        if is_current_timer(card):
+            title = card['desc']
+        matches = list(re.finditer(pattern, title))
+        temp = '{}'.format(title[:matches[0].span()[0]-2])
+        acc_time += smart_time(matches)
+        end_time = start_time + datetime.timedelta(seconds=acc_time)
+        temp += 'ends at {}'.format(end_time.strftime('%H:%M:%S'))
+        desc += [temp]
+    return desc
+
 
 def is_current_timer(card):
     labels = card['labels']
@@ -134,6 +150,7 @@ def main(stats_card, q):
                 serial_cards = new_cards
                 # update_card_data(serial_cards)
                 title = generate_title_summary(serial_cards, begin_time)
+                desc = '\n'.join(accumulate_card_time_description(serial_cards, begin_time))
                 trello.cards.update_name(stats_card['id'], title)
 
                 data = get_times_and_labels(serial_cards)
