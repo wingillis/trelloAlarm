@@ -96,3 +96,7 @@ def find_yellow(cards):
 def generate_card(trello, l_id, title):
     card = trello.cards.new(title, l_id)
     return card
+
+def get_tags(cards):
+    titles = [card['title'] for card in cards]
+    
