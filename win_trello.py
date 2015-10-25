@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 
 def login_and_get_boards(trello):
     wg = trello.members.get('winthropgillis')
@@ -98,5 +99,17 @@ def generate_card(trello, l_id, title):
     return card
 
 def get_tags(cards):
-    titles = [card['title'] for card in cards]
-    
+    titles = [card['name'] for card in cards]
+    pattern = '#(?P<tag>\w+) '
+    data = defaultdict(list)
+    for name in titles:
+        tags = list(re.finditer(pattern, name))
+        for t in tags:
+            data[t.group('tag')] += [name]
+    return data
+
+def filter_for_tag(cards, tag):
+    ''' returns a list if the tag exists,
+    else it returns None'''
+    tags = get_tags(cards)
+    return tags.get(tag, None)

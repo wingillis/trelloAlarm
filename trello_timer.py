@@ -14,8 +14,8 @@ from win_trello import *
 
 def say(text):
     # temporarily turning this off for quietness
-    # subprocess.call(['say', text])
-    pass
+    subprocess.call(['say', text])
+    # pass
 
 
 def find_card_in_list(lis, card):
