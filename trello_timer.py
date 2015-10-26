@@ -91,9 +91,11 @@ def main_timer(trello, cards, index, serial_id, loud=True):
 
             for j in range(t, 0, -10):
                 # check for ending
+
                 if is_ending():
                     end = True
                     break
+                t1 = time.time()
                 card = trello.cards.update(card['id'])
                 if is_done(card):
                     print('Card finished early')
@@ -105,14 +107,16 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                 if not_done(card):
                     print('Card detected to be not done')
                     while not_done(card):
+                        tt1 = time.time()
                         if is_ending():
                             print('Ending detected! Shutting down...')
                             trello.cards.delete_label_color('orange', card['id'])
                             end = True
                             break
+                        card = trello.cards.update(card['id'])
                         time.sleep(10)
                         plus_time += 10
-                        card = trello.cards.update(card['id'])
+
                         if is_done(card):
                             print('Delayed card now finished')
                             break
@@ -127,9 +131,9 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                         title += ' actual time {}m {}s'.format(delta//60, delta%60)
                         break
 
-                if end:
-                    print('End detected! Breaking out of timer loop')
-                    break
+                # if end:
+                #     print('End detected! Breaking out of timer loop')
+                #     break
 
                 if not minutes:
                     timer_name(card, name, j + remainder, True)
@@ -137,8 +141,9 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                 elif minutes != round(j/60):
                     minutes = round(j/60)
                     timer_name(card, name, minutes)
-
-                time.sleep(10)
+                t2 = time.time()
+                # print('This is how long it takes: {0:.2f}s'.format(t2-t1))
+                time.sleep(10 - (t2-t1))
 
 
             # finish the rest of the seconds on the timer
