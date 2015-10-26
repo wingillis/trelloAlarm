@@ -109,7 +109,11 @@ def get_tags(cards):
     return data
 
 def filter_for_tag(cards, tag):
-    ''' returns a list if the tag exists,
+    ''' returns a list of cards with that tag if the tag exists,
     else it returns None'''
     tags = get_tags(cards)
-    return tags.get(tag, None)
+    cs = tags.get(tag, None)
+    if cs:
+        return [c for c in cards if c['name'] in cs]
+    else:
+        return None

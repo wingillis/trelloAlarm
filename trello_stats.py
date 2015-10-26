@@ -5,25 +5,14 @@ import time
 import datetime
 import re
 import plt_data
-# from io import StringIO
 
-# add all new cards to 'original' sub-dictionary
-# add all modifications to 'modified' sub-dictionary
-# card_data {}
-#
-# def update_card_data(cards):
-#     global card_data
-#     for card in cards:
-#         if card['id'] not in card_data:
-#             card_data[card['id']] = {}
-#             card_data[card['id']]['original'] = card
-#         else:
-#             card_data[card['id']]['modified'] = card
-#     # remove any cards not in card data
-#     card_ids = set(card_data.keys())
-#     new_ids = set([card['id'] for card in cards])
-#     for i in card_ids - new_ids:
-#         del card_data[i]
+def get_exercise(cards):
+    '''Accumulates the time you plan to spend on exercise'''
+    i = detect_green(cards)
+    # only get cards that are before and including the current timer card
+    cs = filter_for_tag(cards[:i+1], 'gym')
+    gym_time = accumulate_card_time(cs)
+    return gym_time
 
 
 def smart_time(matches):
@@ -36,6 +25,8 @@ def smart_time(matches):
     return (minute*60) + sec
 
 def accumulate_card_time(cards):
+    ''' Takes in a list of card dicts, and returns
+    the total time displayed on the cards'''
     pattern = '[0-9]{1,4}m [0-9]{1,2}s'
     times = 0
     for card in cards:
@@ -89,9 +80,10 @@ def get_times_and_labels(cards):
     return data
 
 
-def detect_green():
+def detect_green(cards):
+    '''Returns first instance of where green is detected'''
     # detect index of current card, and subtract times
-    pass
+    return [i for i, x in enumerate(cards) if is_current_timer(x)][0]
 
 def generate_title_summary(serial_cards, begin_time):
     title_1 = 'Projected end time: {}'
@@ -104,12 +96,12 @@ def generate_title_summary(serial_cards, begin_time):
 
 
 def order_changed(serial_cards, new_cards):
-    # only change for differences in descriptions or ids
+    # only change for differences in ids
     ids = tuple(map(lambda a: [x['id'] for x in a], (serial_cards, new_cards)))
     return (ids[0] != ids[1])
 
 def something_changed(serial_cards, new_cards):
-
+    # returns true if there is a change between either the descriptions or titles
     desc = list(map(lambda a: [x['desc'] for x in a], (serial_cards, new_cards)))
     title = list(map(lambda a: [x['name'] for x in a if not is_current_timer(x)], (serial_cards, new_cards)))
     c1 = set(desc[0]) | set(title[0])
@@ -167,6 +159,7 @@ def main(stats_card, q):
 
                 piechart_card = trello.cards.update(piechart_card['id'])
         except Exception as e:
+            print('Problem in trello_stats.py')
             print('Catching exception that was thrown... {}'.format(e))
             print('Don\'t worry, not stopping the program')
 
