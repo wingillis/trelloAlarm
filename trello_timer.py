@@ -114,8 +114,6 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                             end = True
                             break
                         card = trello.cards.update(card['id'])
-                        time.sleep(10)
-                        plus_time += 10
 
                         if is_done(card):
                             print('Delayed card now finished')
@@ -126,6 +124,10 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                             timer_name(card, name, val, sec,
                                     added=' delayed - running total {}m {}s'
                                         .format(delta//60, delta%60))
+                        tt2 = time.time()
+                        time.sleep(10 - (tt2-tt1))
+                        plus_time += 10
+
                     if not end:
                         delta = t - (j + remainder) + plus_time
                         title += ' actual time {}m {}s'.format(delta//60, delta%60)
