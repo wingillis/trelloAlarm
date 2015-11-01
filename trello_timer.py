@@ -9,11 +9,14 @@ import select
 import threading
 import trello_stats
 import queue
+import pushbullet
 from win_trello import *
 
+pb = [x for x in pushbullet.Pushbullet(os.environ['pushbullet_token']).devices
+            if x.nickname == 'AndroidPhone'][0]
 
 def say(text):
-    # temporarily turning this off for quietness
+    pb.push_note('Trello timer: ', text)
     subprocess.call(['say', text])
     # pass
 

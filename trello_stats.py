@@ -76,7 +76,7 @@ def get_times_and_labels(cards):
             matches = list(re.finditer(pattern, card['name']))
         data += [(title, smart_time(matches))]
 
-    data = sorted(data, key=lambda a: a[1])
+    # data = sorted(data, key=lambda a: a[1])
     return data
 
 
