@@ -125,7 +125,10 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                                     added=' delayed - running total {}m {}s'
                                         .format(delta//60, delta%60))
                         tt2 = time.time()
-                        time.sleep(10 - (tt2-tt1))
+                        slpt = (10- (tt2-tt1))
+                        if slpt<0:
+                            slpt = 10
+                        time.sleep(slpt)
                         plus_time += 10
 
                     if not end:
@@ -145,7 +148,10 @@ def main_timer(trello, cards, index, serial_id, loud=True):
                     timer_name(card, name, minutes)
                 t2 = time.time()
                 # print('This is how long it takes: {0:.2f}s'.format(t2-t1))
-                time.sleep(10 - (t2-t1))
+                slpt = 10 - (t2-t1)
+                if slpt<0:
+                    slpt = 10
+                time.sleep(slpt)
 
 
             # finish the rest of the seconds on the timer
