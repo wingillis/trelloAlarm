@@ -16,7 +16,7 @@ pb = [x for x in pushbullet.Pushbullet(os.environ['pushbullet_token']).devices
             if x.nickname == 'AndroidPhone'][0]
 
 def say(text):
-    pb.push_note('Trello timer: ', text)
+    pb.push_note('Trello timer', text)
     subprocess.call(['say', text])
     # pass
 
