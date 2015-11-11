@@ -12,14 +12,20 @@ import queue
 import pushbullet
 from win_trello import *
 
-pb = [x for x in pushbullet.Pushbullet(os.environ['pushbullet_token']).devices
-            if x.nickname == 'AndroidPhone'][0]
+devs = [x for x in pushbullet.Pushbullet(os.environ['pushbullet_token']).devices
+            if x.nickname in ('AndroidPhone', 'Python app')]
+comp = [x for x in devs if 'Python' in x.nickname][0]
+android = [x for x in devs if 'Android' in x.nickname][0]
 
 def say(text):
-    pb.push_note('Trello timer', text)
+    comp.push_note('Trello timer', text, device=android)
     subprocess.call(['say', text])
     # pass
 
+def poll():
+    # get messages sent to comp and then parse them
+    # TODO: Get and parse messages and return state a value 
+    pass
 
 def find_card_in_list(lis, card):
     pos = [i for i,x in enumerate(lis) if x['id']==card['id']][0]
