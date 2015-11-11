@@ -4,7 +4,7 @@ from win_trello import *
 
 def process_tasks(trello, plist):
     plist_cards = get_cards(trello, plist)
-    with open('task_history.csv', 'a') as f:
+    with open('task_history.tsv', 'a') as f:
         for card in plist_cards:
             data = parseProcessedCard(card)
             if data.get('1.name', None):
