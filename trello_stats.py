@@ -147,9 +147,10 @@ def main(stats_card, q):
                 trello.cards.update_desc(stats_card['id'], desc)
 
                 data = get_times_and_labels(serial_cards)
-                labels = list(map(lambda a: a[0], data))
-                times = list(map(lambda a: a[1], data))
-                img_link, plotly_link = plt_data.draw_piechart(labels, times)
+                # labels = list(map(lambda a: a[0], data))
+                # times = list(map(lambda a: a[1], data))
+                # img_link, plotly_link = plt_data.draw_piechart(labels, times)
+                img_link, plotly_link = plt_data.draw_horiz_bar_graph(data, begin_time)
                 if piechart_card['badges']['attachments'] >= 2:
                     for a in trello.cards.get_attachment(piechart_card['id']):
                         trello.cards.delete_attachment(piechart_card['id'], a['id'])
