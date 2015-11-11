@@ -11,20 +11,24 @@ import trello_stats
 import queue
 import pushbullet
 from win_trello import *
+from win_pushbullet import *
 
-devs = [x for x in pushbullet.Pushbullet(os.environ['pushbullet_token']).devices
+pb = pushbullet.Pushbullet(os.environ['pushbullet_token'])
+devs = [x for x in pb.devices
             if x.nickname in ('AndroidPhone', 'Python app')]
 comp = [x for x in devs if 'Python' in x.nickname][0]
 android = [x for x in devs if 'Android' in x.nickname][0]
 
 def say(text):
-    comp.push_note('Trello timer', text, device=android)
+    android.push_note('Trello timer', text)
     subprocess.call(['say', text])
     # pass
 
 def poll():
     # get messages sent to comp and then parse them
-    # TODO: Get and parse messages and return state a value 
+    # TODO: Get and parse messages and return state a value
+    notifs = pb.get_pushes(limit=4)
+    
     pass
 
 def find_card_in_list(lis, card):
