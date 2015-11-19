@@ -5,6 +5,7 @@ import time
 import datetime
 import re
 import plt_data
+import requests
 
 def get_exercise(cards):
     '''Accumulates the time you plan to spend on exercise'''
@@ -19,9 +20,15 @@ def smart_time(matches):
     time_str = ''
     for match in matches:
         time_str = match.group()
-    minute, sec = time_str.split(' ')
-    minute = int(minute[:-1])
-    sec = int(sec[:-1])
+    try:
+        minute, sec = time_str.split(' ')
+        minute = int(minute[:-1])
+        sec = int(sec[:-1])
+    except Exception as e:
+        print(time_str)
+        print('Parsing error, setting values to 0')
+        minute, sec = (0,0)
+
     return (minute*60) + sec
 
 def accumulate_card_time(cards):
@@ -129,6 +136,57 @@ def main(stats_card, q):
     serial_cards = []
     begin_time = datetime.datetime.now()
 
+    def get_new_cards():
+        try:
+            new_cards = get_cards(trello, serial_list_id)
+        except Exception as e:
+            print('Error in get_new_cards')
+            print(e)
+            new_cards = get_new_cards()
+        finally:
+            return new_cards
+
+    def update_summary(title, desc):
+        try:
+            trello.cards.update_name(stats_card['id'], title)
+            trello.cards.update_desc(stats_card['id'], desc)
+        except requests.HTTPError as e:
+            if e.response.status_code == 408:
+                print('Status code 408, retrying...')
+                update_summary(title, desc)
+            else:
+                print('Error in update_summary')
+                print(e)
+
+    def update_chart(img_link, plotly_link):
+        try:
+            if piechart_card['badges']['attachments'] >= 2:
+                for a in trello.cards.get_attachment(piechart_card['id']):
+                    trello.cards.delete_attachment(piechart_card['id'], a['id'])
+            trello.cards.new_attachment(piechart_card['id'], img_link, 'Chart')
+                # f = StringIO(plotly_link)
+            trello.cards.new_attachment(piechart_card['id'], plotly_link, 'Chart - Interactive')
+        except requests.HTTPError as e:
+            if e.response.status_code == 408:
+                print('Status code 408, retrying...')
+                update_chart(img_link, plotly_link)
+            else:
+                print('Error in update_summary')
+                print(e)
+
+    def get_updated_card():
+        try:
+            card = trello.cards.update(piechart_card['id'])
+        except requests.HTTPError as e:
+            if e.response.status_code == 408:
+                print('408 in getting updated card')
+                card = get_updated_card()
+            else:
+                print('Problem with something else in updated card')
+                print(e)
+        finally:
+            return card
+
     while True:
         if not q.empty():
             if q.get():
@@ -136,34 +194,19 @@ def main(stats_card, q):
                 print('Quitting')
                 trello.cards.update(piechart_card['id'], pos=piechart_card['pos']+1)
                 break
-        try:
-            new_cards = get_cards(trello, serial_list_id)
-       	    if order_changed(serial_cards, new_cards) or something_changed(serial_cards, new_cards):
-                serial_cards = new_cards
-                # update_card_data(serial_cards)
-                title = generate_title_summary(serial_cards, begin_time)
-                desc = '\n'.join(accumulate_card_time_description(serial_cards, begin_time))
-                trello.cards.update_name(stats_card['id'], title)
-                trello.cards.update_desc(stats_card['id'], desc)
+        new_cards = get_new_cards()
+       	if order_changed(serial_cards, new_cards) or something_changed(serial_cards, new_cards):
+            serial_cards = new_cards
 
-                data = get_times_and_labels(serial_cards)
-                # labels = list(map(lambda a: a[0], data))
-                # times = list(map(lambda a: a[1], data))
-                # img_link, plotly_link = plt_data.draw_piechart(labels, times)
-                img_link, plotly_link = plt_data.draw_horiz_bar_graph(data, begin_time)
-                if piechart_card['badges']['attachments'] >= 2:
-                    for a in trello.cards.get_attachment(piechart_card['id']):
-                        trello.cards.delete_attachment(piechart_card['id'], a['id'])
-                trello.cards.new_attachment(piechart_card['id'], img_link, 'Chart')
-                # f = StringIO(plotly_link)
-                trello.cards.new_attachment(piechart_card['id'], plotly_link, 'Chart - Interactive')
+            title = generate_title_summary(serial_cards, begin_time)
+            desc = '\n'.join(accumulate_card_time_description(serial_cards, begin_time))
+            update_summary(title, desc)
 
-                piechart_card = trello.cards.update(piechart_card['id'])
-        except Exception as e:
-            print('Problem in trello_stats.py')
-            print('Catching exception that was thrown... {}'.format(e))
-            print('Don\'t worry, not stopping the program')
+            data = get_times_and_labels(serial_cards)
 
+            img_link, plotly_link = plt_data.draw_horiz_bar_graph(data, begin_time)
+            update_chart(img_link, plotly_link)
 
+            piechart_card = get_updated_card()
 
         time.sleep(10)
