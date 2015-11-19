@@ -18,10 +18,13 @@ devs = [x for x in pb.devices
             if x.nickname in ('AndroidPhone', 'Python app')]
 comp = [x for x in devs if 'Python' in x.nickname][0]
 android = [x for x in devs if 'Android' in x.nickname][0]
+win_comp = [x for x in pb.devices if 'MacBook' in x.nickname][0]
 
 def say(text):
     android.push_note('Trello timer', text)
-    subprocess.call(['say', text])
+    win_comp.push_note('Trello timer', text)
+    if len(sys.argv) < 3: 
+    	subprocess.call(['say', text])
     # pass
 
 def poll():
