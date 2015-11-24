@@ -3,3 +3,9 @@ def filter_for_device(notifs, device):
 
 def filter_for_text(notifs, text):
     return [x for x in notifs if text.lower() in x.get('body').lower()]
+
+def clear_notif(notif, pb):
+    pb.dismiss_push(notif.get('iden'))
+
+def delete_notif(notif, pb):
+    pb.delete_push(notif.get('iden'))
