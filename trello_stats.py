@@ -207,7 +207,7 @@ def main(stats_card, q):
                 trello.cards.update(piechart_card['id'], pos=piechart_card['pos']+1)
                 break
         new_cards = get_new_cards()
-           if order_changed(serial_cards, new_cards) or something_changed(serial_cards, new_cards):
+        if order_changed(serial_cards, new_cards) or something_changed(serial_cards, new_cards):
             serial_cards = new_cards
 
             title = generate_title_summary(serial_cards, begin_time)
