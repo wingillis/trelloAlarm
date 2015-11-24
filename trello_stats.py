@@ -157,6 +157,9 @@ def main(stats_card, q):
             else:
                 print('Error in update_summary')
                 print(e)
+        except Exception as e:
+            print('In update summary')
+	    print(e)
 
     def update_chart(img_link, plotly_link):
         try:
@@ -173,6 +176,10 @@ def main(stats_card, q):
             else:
                 print('Error in update_summary')
                 print(e)
+        except Exception as e:
+            print('In update_chart')
+	    print(e)
+
 
     def get_updated_card():
         try:
@@ -184,6 +191,11 @@ def main(stats_card, q):
             else:
                 print('Problem with something else in updated card')
                 print(e)
+        except Exception as e:
+            print('In get_updated_card')
+	    print(e)
+	    #print('\nTrying again...')
+	    
         finally:
             return card
 
