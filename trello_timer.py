@@ -17,7 +17,7 @@ pb = pushbullet.Pushbullet(os.environ['pushbullet_token'])
 devs = [x for x in pb.devices
             if x.nickname in ('Galaxy S6', 'Python app')]
 comp = [x for x in devs if 'Python' in x.nickname][0]
-android = [x for x in devs if 'Android' in x.nickname][0]
+android = [x for x in devs if 'Galaxy' in x.nickname][0]
 win_comp = [x for x in pb.devices if 'MacBook' in x.nickname][0]
 
 def say(text):
