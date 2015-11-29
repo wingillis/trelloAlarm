@@ -15,7 +15,7 @@ from win_pushbullet import *
 
 pb = pushbullet.Pushbullet(os.environ['pushbullet_token'])
 devs = [x for x in pb.devices
-            if x.nickname in ('AndroidPhone', 'Python app')]
+            if x.nickname in ('Galaxy S6', 'Python app')]
 comp = [x for x in devs if 'Python' in x.nickname][0]
 android = [x for x in devs if 'Android' in x.nickname][0]
 win_comp = [x for x in pb.devices if 'MacBook' in x.nickname][0]
@@ -23,7 +23,7 @@ win_comp = [x for x in pb.devices if 'MacBook' in x.nickname][0]
 def say(text):
     android.push_note('Trello timer', text)
     win_comp.push_note('Trello timer', text)
-    if len(sys.argv) < 3: 
+    if len(sys.argv) < 3:
     	subprocess.call(['say', text])
     # pass
 
@@ -31,7 +31,7 @@ def poll():
     # get messages sent to comp and then parse them
     # TODO: Get and parse messages and return state a value
     notifs = pb.get_pushes(limit=4)
-    
+
     pass
 
 def find_card_in_list(lis, card):
